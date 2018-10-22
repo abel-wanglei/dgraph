@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"math"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -228,8 +229,14 @@ func ReadPostingList(key []byte, it *badger.Iterator) (*List, error) {
 	return l, nil
 }
 
+var listPool = sync.Pool{
+	New: func() interface{} {
+		return new(List)
+	},
+}
+
 func getNew(key []byte, pstore *badger.DB) (*List, error) {
-	l := new(List)
+	l := listPool.Get().(*List)
 	l.key = key
 	l.mutationMap = make(map[uint64]*pb.PostingList)
 	l.plist = new(pb.PostingList)
@@ -241,7 +248,8 @@ func getNew(key []byte, pstore *badger.DB) (*List, error) {
 		return l, nil
 	}
 	if err != nil {
-		return l, err
+		listPool.Put(l)
+		return nil, err
 	}
 	if item.UserMeta()&BitCompletePosting > 0 {
 		err = unmarshalOrCopy(l.plist, item)
@@ -257,7 +265,8 @@ func getNew(key []byte, pstore *badger.DB) (*List, error) {
 	}
 
 	if err != nil {
-		return l, err
+		listPool.Put(l)
+		return nil, err
 	}
 
 	l.onDisk = true

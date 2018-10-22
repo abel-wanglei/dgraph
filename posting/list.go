@@ -28,11 +28,6 @@ import (
 	"time"
 	"unsafe"
 
-	"golang.org/x/net/trace"
-
-	"github.com/dgryski/go-farm"
-	"github.com/golang/glog"
-
 	"github.com/dgraph-io/dgo/protos/api"
 	"github.com/dgraph-io/dgo/y"
 	"github.com/dgraph-io/dgraph/algo"
@@ -42,6 +37,9 @@ import (
 	"github.com/dgraph-io/dgraph/types"
 	"github.com/dgraph-io/dgraph/types/facets"
 	"github.com/dgraph-io/dgraph/x"
+	"github.com/dgryski/go-farm"
+	"github.com/golang/glog"
+	"golang.org/x/net/trace"
 )
 
 var (
